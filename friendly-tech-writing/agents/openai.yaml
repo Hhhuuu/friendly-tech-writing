@@ -1,0 +1,4 @@
+interface:
+  display_name: "Friendly Tech Writing"
+  short_description: "Понятные и человечные тексты об ИТ"
+  default_prompt: "Используй $friendly-tech-writing, чтобы написать или отредактировать этот технический текст понятным и дружелюбным языком."
