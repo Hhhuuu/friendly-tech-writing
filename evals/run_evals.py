@@ -183,6 +183,10 @@ def check_output(case: dict[str, Any], text: str) -> list[str]:
     if isinstance(max_lists, int) and count_list_blocks(text) > max_lists:
         failures.append(f"слишком много отдельных списков: больше {max_lists}")
 
+    max_questions = case.get("max_question_marks")
+    if isinstance(max_questions, int) and text.count("?") > max_questions:
+        failures.append(f"слишком много вопросов: больше {max_questions}")
+
     return failures
 
 

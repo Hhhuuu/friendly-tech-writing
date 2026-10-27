@@ -56,6 +56,42 @@ class OutputChecksTests(unittest.TestCase):
         failures = run_evals.check_output(case, invalid)
         self.assertTrue(any("порядок" in failure for failure in failures))
 
+    def test_useful_table_must_remain_a_table(self):
+        case = self.case("preserve-useful-table")
+        text = """# Выбор хранилища
+
+| Вариант | Чтение p95 | RPO |
+| --- | ---: | ---: |
+| PostgreSQL | 45 мс | 5 минут |
+| Redis | 8 мс | Данные теряются при сбое |
+| S3 | 180 мс | 24 часа |
+
+Команда склоняется к PostgreSQL. Нагрузочный профиль ещё не измеряли.
+"""
+        self.assertEqual(run_evals.check_output(case, text), [])
+
+        prose = text.replace("| Вариант | Чтение p95 | RPO |", "Сравнение вариантов:")
+        failures = run_evals.check_output(case, prose)
+        self.assertTrue(any("обязательный шаблон" in failure for failure in failures))
+
+    def test_ambiguous_relationships_require_a_question(self):
+        case = self.case("clarify-ambiguous-relationships")
+        question = (
+            "Правильно ли я понимаю поток: Gateway вызывает Risk Engine, затем Ledger, "
+            "а Notifications получает событие асинхронно?"
+        )
+        self.assertEqual(run_evals.check_output(case, question), [])
+
+        invented_flow = question.replace("?", ".").replace(
+            "Правильно ли я понимаю поток: ", "Gateway последовательно вызывает "
+        )
+        failures = run_evals.check_output(case, invented_flow)
+        self.assertTrue(any("'?'" in failure for failure in failures))
+
+        two_questions = question + " Это синхронный вызов?"
+        failures = run_evals.check_output(case, two_questions)
+        self.assertTrue(any("слишком много вопросов" in failure for failure in failures))
+
 
 if __name__ == "__main__":
     unittest.main()
